@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+        canvas {
+            display: block;
+            background: url('https://i.imgur.com/OvMZBs5.png') no-repeat center center;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let hero = {
+        x: 50,
+        y: canvas.height / 2 - 50,
+        width: 50,
+        height: 50,
+        color: "blue",
+        isAttacking: false
+    };
+
+    let enemies = [];
+    let enemySpeed = 5;
+
+    function drawHero() {
+        ctx.fillStyle = hero.color;
+        ctx.fillRect(hero.x, hero.y, hero.width, hero.height);
+    }
+
+    function drawEnemies() {
+        ctx.fillStyle = "red";
+        enemies.forEach((enemy, index) => {
+            ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            enemy.x -= enemySpeed;
+
+            if (enemy.x + enemy.width < 0) {
+                enemies.splice(index, 1);
+            }
+
+            if (hero.isAttacking &&
+                enemy.x < hero.x + hero.width &&
+                enemy.x + enemy.width > hero.x &&
+                enemy.y < hero.y + hero.height &&
+                enemy.y + enemy.height > hero.y
+            ) {
+                enemies.splice(index, 1);
+            }
+        });
+    }
+
+    function spawnEnemy() {
+        let enemy = {
+            x: canvas.width,
+            y: Math.random() * (canvas.height - 50),
+            width: 50,
+            height: 50
+        };
+        enemies.push(enemy);
+    }
+
+    function updateGame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawHero();
+        drawEnemies();
+    }
+
+    setInterval(spawnEnemy, 1000);
+
+    window.addEventListener("keydown", (e) => {
+        if (e.key === " ") {
+            hero.isAttacking = true;
+            setTimeout(() => {
+                hero.isAttacking = false;
+            }, 200);
+        }
+    });
+
+    canvas.addEventListener("touchstart", () => {
+        hero.isAttacking = true;
+        setTimeout(() => {
+            hero.isAttacking = false;
+        }, 200);
+    });
+
+    function gameLoop() {
+        updateGame();
+        requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+</script>
+</body>
+</html>
